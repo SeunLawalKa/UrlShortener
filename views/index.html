@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,minimal-ui">
+    <title>UrlShortener</title>
+    <meta content="UrlShortener Website" name="description">
+    <meta content="" name="author">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Recursive", sans-serif;
+            font-size: 12px;
+        }
+        
+        .custom-border {
+            border-radius: 10px 10px;
+        }
+        
+        .header {
+            width: 100%;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            background: rgb(84, 4, 67);
+            color: #eee;
+            font-weight: 600;
+        }
+        
+        .form {
+            padding: 50px 20px;
+            background: rgb(218, 209, 216);
+        }
+        
+        .form div {
+            width: 425px;
+            margin: 10px auto;
+        }
+        
+        .form .form-element input,
+        .form .form-element button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .form .form-element button {
+            background: rgb(154, 24, 126);
+            color: #eee;
+            outline: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .form .result {
+            text-align: center;
+            border-top: 1px solid #eee;
+            margin-top: px;
+        }
+        
+        .list {
+            width: 800px;
+            margin: 40px auto;
+        }
+        
+        .list h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #5a3092;
+        }
+        
+        .list table {
+            width: 100%;
+            text-align: justify;
+        }
+        
+        .list table thead tr {
+            background: rgb(154, 24, 126);
+            color: #eee;
+        }
+        
+        .list table thead tr th,
+        .list table tbody tr td {
+            padding: 5px;
+        }
+        
+        .list table tbody tr:nth-child(odd) {
+            background: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header" style="font-size: larger !important;">Url Shortener Site</div>
+    <div class="form">
+        <div class="form-element">
+            <input style="border-radius: 5px 5px;" type="text" id="longurl" placeholder="Paste long url here, e.g. https//mysite.com/search?client=firefox-b-d&q=node+js+length+of+an+array+sample ..." />
+        </div>
+        <div class="form-element">
+            <button class="custom-border" id="create-short-url">Create Short Url</button>
+        </div>
+    </div>
+    <!-- <div class="result">
+        <a href="#" id="short-url"></a>
+    </div> -->
+    <div class="list">
+        <h2>Links View</h2>
+        <div class="form-element">
+            <input style="border-radius: 5px 5px; height: 25px;" type="text" id="searchLink" placeholder="Search long url here ..." />
+        </div>
+        <table id="list_urls">
+            <thead>
+                <tr>
+                    <th>SN</th>
+                    <th>LongUrl</th>
+                    <th>ShortUrl</th>
+                    <th>ShortCode</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const localhost = "http://localhost:5000/";
+        let sn = 0;
+        document.querySelector("#create-short-url").addEventListener("click", function() {
+            let longurl = document.querySelector("#longurl").value.trim();
+            debugger;
+            if (longurl.length == 0) {
+                alert("Invalid input");
+                return;
+            } else if (!(longurl.startsWith("http://") || longurl.startsWith("https://"))) {
+                alert("Invalid Url");
+                return;
+            }
+            fetch(localhost + "api/encode", {
+                method: "POST",
+                body: JSON.stringify({
+                    longurl: longurl
+                }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            }).then(function(response) {
+                debugger;
+                document.querySelector("#longurl").value = "";
+                return response.json();
+            }).then(function(data) {
+                if (data.status == true) {
+                    debugger;
+                    let html = "";
+                    sn = sn == 0 ? 1 : sn;
+                    html += `
+                        <tr>
+                            <td>${sn}</td>
+                            <td>${longurl}</td>
+                            <td><a href="${data.data.shorturl}">${data.data.shorturl}</a></td>
+                            <td>${data.data.urlcode}</td>
+                            <td>${data.data.count}</td>
+                        </tr>
+                    `;
+                    document.querySelector("#list_urls tbody").innerHTML += html;
+
+                }
+                console.log(data)
+            }).catch(function(error) {
+
+
+            })
+        });
+
+        function fetchAllLinks() {
+            fetch(localhost + "api/list").then(function(response) {
+                return response.json();
+            }).then(function(data) {
+                var _html = "";
+                debugger;
+                sn = sn <= 1 ? 1 : sn;
+                for (var i = 0; i < data.length; i++) {
+                    debugger;
+                    _html += `
+                        <tr>
+                            <td>${sn}</td>
+                            <td>${data[i].longurl}</td>
+                            <td><a href="${data[i].shorturl}">${data[i].shorturl}</a></td>
+                            <td>${data[i].urlcode}</td>
+                            <td>${data[i].count}</td>
+                        </tr>
+                    `;
+                    sn++;
+                }
+                document.querySelector("#list_urls tbody").innerHTML = _html;
+            }).catch(function(error) {
+                alert("An error occured somewhere ...");
+            })
+        }
+
+        (function() {
+
+            fetchAllLinks();
+
+        })();
+
+
+        document.querySelector("#searchLink").addEventListener("input", function() {
+            let txt = document.querySelector("#searchLink").value.trim();
+            debugger;
+            if (txt.length < 3) {
+                //alert("Invalid input");
+                return;
+            }
+            fetch(localhost + "api/search", {
+                method: "POST",
+                body: JSON.stringify({
+                    text: txt
+                }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            }).then(function(response) {
+                debugger;
+                document.querySelector("#searchLink").value = "";
+                return response.json();
+            }).then(function(data) {
+                var shtml = "";
+                if (data.length > 0) {
+                    debugger;
+                    sn = 1;
+                    for (var i = 0; i < data.length; i++) {
+                        debugger;
+                        shtml += `
+                        <tr>
+                            <td>${sn}</td>
+                            <td>${data[i].longurl}</td>
+                            <td><a href="${data[i].shorturl}">${data[i].shorturl}</a></td>
+                            <td>${data[i].urlcode}</td>
+                            <td>${data[i].count}</td>
+                        </tr>
+                    `;
+                        sn++;
+                    }
+                }
+                document.querySelector("#list_urls tbody").innerHTML = shtml;
+                console.log(data)
+            }).catch(function(error) {
+                alert(error);
+            })
+        });
+    </script>
+</body>
+
+</html>
