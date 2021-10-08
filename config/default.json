@@ -1,0 +1,22 @@
+{
+    "baseUrl": "http://localhost:5000",
+    "mysqlConn": {
+        "host": "mysqldb",
+        "user": "root",
+        "password": "%#fcmb@sme",
+        "database": "urlshortener",
+        "port": 3306,
+        "connectionLimit ": 10
+    },
+    "encode_sql_query": "INSERT INTO `links` (`longurl`, `shorturl`, `urlcode`) VALUES (?,?,?)",
+    "decode_sql_query": "SELECT * FROM `links` WHERE `shorturl` = ? ORDER BY ID DESC LIMIT 1",
+    "list_sql_query": "SELECT * FROM `links` ",
+    "statistic_sql_query": "SELECT * FROM `links` WHERE `urlcode` = ? ORDER BY ID DESC LIMIT 1",
+    "url_path_select_query": "SELECT * FROM `links` WHERE `urlcode` = ? ORDER BY ID DESC LIMIT 1",
+    "url_path_update_query": "UPDATE `links` SET count = ? WHERE `id` = ?",
+    "links_search_select_query": "SELECT * FROM `links` WHERE `longurl` LIKE '% ? %'",
+    "invalidurlpath_msg": "Invalid url path",
+    "servererror_msg": "Server error",
+    "urlpathnotexist_msg": "url path does not exist",
+    "anerror_msg": "an error occurred ..."
+}
